@@ -21,14 +21,14 @@
           python310
         ];
 
-        buildInputs = with pkgs; [
+        propagatedBuildInputs = with pkgs; [
           python310Packages.tomlkit
           python310Packages.click-aliases
           python310Packages.click
         ];
 
       in {
-        devShells.default = pkgs.mkShell {inherit nativeBuildInputs buildInputs;};
+        devShells.default = pkgs.mkShell {inherit nativeBuildInputs propagatedBuildInputs;};
 
         #packages.default = python.pkgs.buildPythonApplication {
         packages.default = python.pkgs.buildPythonPackage {
@@ -50,8 +50,10 @@
             chmod +x $out/bin/omen-fand
           '';
 
-           installPhase = ''
+          installPhase = ''
             wrapProgram $out/bin/omen-fan \
+              --set PYTHONPATH "${pkgs.python310Packages.tomlkit}/${python.sitePackages}:${pkgs.python310Packages.click-aliases}/${python.sitePackages}:${pkgs.python310.sitePackages}"
+            wrapProgram $out/bin/omen-fand \
               --set PYTHONPATH "${pkgs.python310Packages.tomlkit}/${python.sitePackages}:${pkgs.python310Packages.click-aliases}/${python.sitePackages}:${pkgs.python310.sitePackages}"
           '';
 
@@ -61,7 +63,7 @@
             maintainers = with maintainers; [ cician ];
           };
 
-          inherit nativeBuildInputs buildInputs;
+          inherit nativeBuildInputs propagatedBuildInputs;
         };
       }
     );
