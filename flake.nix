@@ -18,6 +18,7 @@
         python = pkgs.python310;
 
         nativeBuildInputs = with pkgs; [
+          makeWrapper
           python310
         ];
 
@@ -25,6 +26,11 @@
           python310Packages.tomlkit
           python310Packages.click-aliases
           python310Packages.click
+        ];
+
+        runtimeDeps = with pkgs; [
+          kmod       # for lsmod/modprobe
+          coreutils  # for common shell tools
         ];
 
       in {
@@ -52,9 +58,11 @@
 
           installPhase = ''
             wrapProgram $out/bin/omen-fan \
-              --set PYTHONPATH "${pkgs.python310Packages.tomlkit}/${python.sitePackages}:${pkgs.python310Packages.click-aliases}/${python.sitePackages}:${pkgs.python310.sitePackages}"
+              --set PYTHONPATH "${pkgs.python310Packages.tomlkit}/${python.sitePackages}:${pkgs.python310Packages.click-aliases}/${python.sitePackages}:${pkgs.python310.sitePackages}" \
+              --prefix PATH : ${pkgs.lib.makeBinPath runtimeDeps}
             wrapProgram $out/bin/omen-fand \
-              --set PYTHONPATH "${pkgs.python310Packages.tomlkit}/${python.sitePackages}:${pkgs.python310Packages.click-aliases}/${python.sitePackages}:${pkgs.python310.sitePackages}"
+              --set PYTHONPATH "${pkgs.python310Packages.tomlkit}/${python.sitePackages}:${pkgs.python310Packages.click-aliases}/${python.sitePackages}:${pkgs.python310.sitePackages}" \
+              --prefix PATH : ${pkgs.lib.makeBinPath runtimeDeps}
           '';
 
           meta = with pkgs.lib; {
@@ -63,7 +71,7 @@
             maintainers = with maintainers; [ cician ];
           };
 
-          inherit nativeBuildInputs propagatedBuildInputs;
+          inherit nativeBuildInputs propagatedBuildInputs runtimeDeps;
         };
       }
     );
