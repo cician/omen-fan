@@ -3,7 +3,7 @@
 
   inputs = {
     #nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -16,17 +16,18 @@
       system: let
         pkgs = nixpkgs.legacyPackages.${system};
 
-        python = pkgs.python310;
+        python = pkgs.python313;
+        pythonPackages = pkgs.python313Packages;
 
         nativeBuildInputs = with pkgs; [
           makeWrapper
-          python310
+          python
         ];
 
         propagatedBuildInputs = with pkgs; [
-          python310Packages.tomlkit
-          python310Packages.click-aliases
-          python310Packages.click
+          pythonPackages.tomlkit
+          pythonPackages.click-aliases
+          pythonPackages.click
         ];
 
         runtimeDeps = with pkgs; [
@@ -59,10 +60,10 @@
 
           installPhase = ''
             wrapProgram $out/bin/omen-fan \
-              --set PYTHONPATH "${pkgs.python310Packages.tomlkit}/${python.sitePackages}:${pkgs.python310Packages.click-aliases}/${python.sitePackages}:${pkgs.python310.sitePackages}" \
+              --set PYTHONPATH "${pythonPackages.tomlkit}/${python.sitePackages}:${pythonPackages.click-aliases}/${python.sitePackages}:${python.sitePackages}" \
               --prefix PATH : ${pkgs.lib.makeBinPath runtimeDeps}
             wrapProgram $out/bin/omen-fand \
-              --set PYTHONPATH "${pkgs.python310Packages.tomlkit}/${python.sitePackages}:${pkgs.python310Packages.click-aliases}/${python.sitePackages}:${pkgs.python310.sitePackages}" \
+              --set PYTHONPATH "${pythonPackages.tomlkit}/${python.sitePackages}:${pythonPackages.click-aliases}/${python.sitePackages}:${python.sitePackages}" \
               --prefix PATH : ${pkgs.lib.makeBinPath runtimeDeps}
           '';
 
